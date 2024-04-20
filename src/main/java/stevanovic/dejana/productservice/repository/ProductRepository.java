@@ -3,7 +3,6 @@ package stevanovic.dejana.productservice.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import stevanovic.dejana.productservice.model.Category;
 import stevanovic.dejana.productservice.model.Product;
 
 import java.util.List;
@@ -17,5 +16,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> searchByNameDescriptionAndCategory(
             @Param("name") String name,
             @Param("description") String description,
-            @Param("category") Category category);
+            @Param("category") String category);
 }

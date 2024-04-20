@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import stevanovic.dejana.productservice.model.Category;
 
 @Data
 @Builder
@@ -14,5 +13,5 @@ public class UpdateProductRequest {
     private Long id;
     private String name;
     private String description;
-    private Category category;
+    private String category;
 }

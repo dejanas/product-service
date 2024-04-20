@@ -27,5 +27,5 @@ public class Product {
     @Column
     private String description;
     @Column
-    private Category category;
+    private String category;
 }
