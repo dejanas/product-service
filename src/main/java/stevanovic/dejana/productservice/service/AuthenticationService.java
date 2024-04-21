@@ -29,4 +29,16 @@ public class AuthenticationService {
 
         return response.getStatusCode().is2xxSuccessful();
     }
+
+    public boolean validateAdminToken(String jwtToken) {
+        String url = USER_SERVICE_URL + "/admin/validate-token";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, jwtToken);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+
+        return response.getStatusCode().is2xxSuccessful();
+    }
 }

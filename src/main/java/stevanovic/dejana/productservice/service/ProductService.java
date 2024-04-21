@@ -23,15 +23,14 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public void createProduct(CreateProductRequest createProductRequest) {
+    public Product createProduct(CreateProductRequest createProductRequest) {
         Product product = Product.builder()
                 .name(createProductRequest.getName())
                 .description(createProductRequest.getDescription())
                 .category(createProductRequest.getCategory())
                 .build();
 
-        productRepository.save(product);
-        log.info("Product {} is saved", product.getId());
+        return productRepository.save(product);
     }
 
     public void updateProduct(Long id, UpdateProductRequest updateProductRequest) {

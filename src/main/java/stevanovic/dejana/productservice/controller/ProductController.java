@@ -1,6 +1,8 @@
 package stevanovic.dejana.productservice.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,14 +15,15 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import stevanovic.dejana.productservice.service.AuthenticationService;
 import stevanovic.dejana.productservice.dto.CreateProductRequest;
 import stevanovic.dejana.productservice.dto.SearchProductsRequest;
 import stevanovic.dejana.productservice.dto.UpdateProductRequest;
 import stevanovic.dejana.productservice.model.Product;
+import stevanovic.dejana.productservice.service.AuthenticationService;
 import stevanovic.dejana.productservice.service.ProductService;
 
-import java.util.List;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @RestController
 @RequestMapping("/api/product")
@@ -31,49 +34,80 @@ public class ProductController {
     private final AuthenticationService authenticationService;
 
 
-//        @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> create(@RequestHeader("Authorization") String jwtToken,
-                                    @RequestBody CreateProductRequest createProductRequest) {
-        if (authenticationService.validateToken(jwtToken)) {
-            productService.createProduct(createProductRequest);
-            return ResponseEntity.ok("Product created successfully");
+    public ResponseEntity<?> create(HttpServletRequest request,
+                                    @RequestHeader(HttpHeaders.AUTHORIZATION) String jwtToken,
+                                    @RequestBody CreateProductRequest createProductRequest) throws URISyntaxException {
+        if (authenticationService.validateAdminToken(jwtToken)) {
+            Product product = productService.createProduct(createProductRequest);
+
+            String uri = request.getRequestURI() + "/" + product.getId();
+            return ResponseEntity
+                    .created(new URI(uri))
+                    .build();
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
-    //    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable Long id, @RequestBody UpdateProductRequest updateProductRequest) {
-        productService.updateProduct(id, updateProductRequest);
+    public ResponseEntity<?> update(@RequestHeader(HttpHeaders.AUTHORIZATION) String jwtToken,
+                                    @PathVariable Long id, @RequestBody UpdateProductRequest updateProductRequest) {
+        if (authenticationService.validateAdminToken(jwtToken)) {
+            productService.updateProduct(id, updateProductRequest);
+
+            return ResponseEntity
+                    .noContent()
+                    .build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
-    //    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void delete(@PathVariable Long id) {
-        productService.deleteProduct(id);
+    public ResponseEntity<?> delete(@RequestHeader(HttpHeaders.AUTHORIZATION) String jwtToken,
+                                    @PathVariable Long id) {
+        if (authenticationService.validateAdminToken(jwtToken)) {
+            productService.deleteProduct(id);
+
+            return ResponseEntity
+                    .noContent()
+                    .build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Product get(@PathVariable Long id) {
-        return productService.getById(id);
+    public ResponseEntity<?> get(@RequestHeader(HttpHeaders.AUTHORIZATION) String jwtToken,
+                                 @PathVariable Long id) {
+        if (authenticationService.validateToken(jwtToken)) {
+            return ResponseEntity.ok(productService.getById(id));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
+    public ResponseEntity<?> getAllProducts(@RequestHeader(HttpHeaders.AUTHORIZATION) String jwtToken) {
+        if (authenticationService.validateToken(jwtToken)) {
+            return ResponseEntity.ok(productService.getAllProducts());
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<Product> searchProducts(SearchProductsRequest searchProductsRequest) {
-        return productService.searchProducts(searchProductsRequest);
+    public ResponseEntity<?> searchProducts(@RequestHeader(HttpHeaders.AUTHORIZATION) String jwtToken,
+            SearchProductsRequest searchProductsRequest) {
+        if (authenticationService.validateToken(jwtToken)) {
+            return ResponseEntity.ok(productService.searchProducts(searchProductsRequest));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
 }
