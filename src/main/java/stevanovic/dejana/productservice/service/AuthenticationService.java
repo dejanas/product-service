@@ -2,10 +2,14 @@ package stevanovic.dejana.productservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import stevanovic.dejana.productservice.dto.AuthenticationResponse;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -20,9 +24,13 @@ public class AuthenticationService {
     public Mono<AuthenticationResponse> authenticateUser(String jwtToken) {
         WebClient webClient = webClientBuilder.baseUrl(USER_SERVICE_URL).build();
 
+        Map<String, String> requestBodyMap = new HashMap<>();
+        requestBodyMap.put("jwtToken", jwtToken);
+
         return webClient.post()
                 .uri("/validate-token")
-                .header(AUTHORIZATION_HEADER, jwtToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(requestBodyMap), Map.class)
                 .retrieve()
                 .bodyToMono(String.class)
                 .flatMap(responseBody -> {
